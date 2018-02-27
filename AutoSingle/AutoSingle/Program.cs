@@ -27,7 +27,10 @@ namespace AutoSingle
             {
                 Test.GoTest();
             }
-
+            else
+            {
+                CoinTrade.BeginRun();
+            }
         }
     }
 }

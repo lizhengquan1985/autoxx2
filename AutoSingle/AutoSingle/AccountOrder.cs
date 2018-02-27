@@ -225,7 +225,7 @@ namespace AutoSingle
             return result;
         }
 
-        public string QueryOrder(string orderId)
+        public ResponseQueryOrder QueryOrder(string orderId, out string orderQuery)
         {
             var action = $"/v1/order/orders/{orderId}";
             var method = "GET";
@@ -242,8 +242,9 @@ namespace AutoSingle
             var url = $"{baseUrl}{action}?{ConvertQueryString(data, true)}";
             int statusCode;
             var result = RequestDataSync(url, method, data, null, out statusCode);
-            Debug.WriteLine(result);
-            return result;
+            orderQuery = result;
+            var res = JsonConvert.DeserializeObject<ResponseQueryOrder>(result);
+            return res;
         }
 
         public string QueryDetail(string orderId)

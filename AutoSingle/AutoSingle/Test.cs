@@ -15,9 +15,13 @@ namespace AutoSingle
             {
                 Console.WriteLine("请选择进入测试的分支");
                 var f = Console.ReadLine();
-                if(f == "balance")
+                if (f == "balance")
                 {
                     Balance();
+                }
+                else if (f == "order")
+                {
+                    Order();
                 }
             }
         }
@@ -70,6 +74,18 @@ namespace AutoSingle
             //        Console.WriteLine($"{flexPoint.isHigh}, {flexPoint.open}, {Utils.GetDateById(flexPoint.id)}");
             //    }
             //}
+        }
+
+        public static void Order()
+        {
+            while (true)
+            {
+                Console.WriteLine("请输入 orderid：");
+                var orderId = Console.ReadLine();
+                string orderQuery = "";
+                var b = new AccountOrder().QueryOrder(orderId, out orderQuery);
+                Console.WriteLine(JsonConvert.SerializeObject(b));
+            }
         }
     }
 }
