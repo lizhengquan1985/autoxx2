@@ -13,7 +13,7 @@ namespace AutoSingle
     {
         public CoinDao()
         {
-            string connectionString = AccountConfig.sqlConfig;//"server=localhost;port=3306;user id=root; password=lyx123456; database=coins; pooling=true; charset=utf8mb4";
+            string connectionString = AccountConfig.sqlConfig;
             var connection = new MySqlConnection(connectionString);
             Database = new DapperConnection(connection);
 
@@ -38,10 +38,10 @@ namespace AutoSingle
             }
         }
 
-        public List<BuyRecord> ListNoSellRecord(string buyCoin)
+        public List<TradeRecord> ListNoSellRecord(string buyCoin)
         {
             var sql = $"select * from t_buy_record where BuyCoin = '{buyCoin}' and HasSell=0 and UserName='{AccountConfig.userName}'";
-            return Database.Query<BuyRecord>(sql).ToList();
+            return Database.Query<TradeRecord>(sql).ToList();
         }
 
         public int GetAllNoSellRecordCount()
@@ -70,23 +70,32 @@ namespace AutoSingle
         }
     }
 
-    [Table("t_buy_record")]
-    public class BuyRecord
+    [Table("t_trade_record")]
+    public class TradeRecord
     {
         public long Id { get; set; }
-        public string BuyCoin { get; set; }
-        public decimal BuyPrice { get; set; }
-        public DateTime BuyDate { get; set; }
+        public string Coin { get; set; }
+        public string AccountId { get; set; }
         public bool HasSell { get; set; }
+        public string UserName { get; set; }
+
+
+        public decimal BuyTotalQuantity { get; set; }
+        public decimal BuyOrderPrice { get; set; }
+        public decimal BuyTradePrice { get; set; }
+        public DateTime BuyDate { get; set; }
+        public string BuyOrderResult { get; set; }
+        public bool BuySuccess { get; set; }
+
+
+        public decimal SellTotalQuantity { get; set; }
+        public decimal SellOrderPrice { get; set; }
+        public decimal SellTradePrice { get; set; }
+        public DateTime SellDate { get; set; }
+        public string SellOrderResult { get; set; }
+        public bool SellSuccess { get; set; }
 
         public string BuyAnalyze { get; set; }
         public string SellAnalyze { get; set; }
-        public string BuyOrderResult { get; set; }
-        public string SellOrderResult { get; set; }
-
-        public DateTime SellDate { get; set; }
-        public decimal SellAmount { get; set; }
-        public decimal BuyAmount { get; set; }
-        public string UserName { get; set; }
     }
 }
