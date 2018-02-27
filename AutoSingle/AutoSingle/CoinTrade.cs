@@ -49,6 +49,11 @@ namespace AutoSingle
             var accountInfo = new AccountOrder().AccountBalance(accountId);
             var usdt = accountInfo.data.list.Find(it => it.currency == "usdt" && it.type == "trade");
             usdtDict.Add(coin, usdt);
+            if (lastGetDate.ContainsKey(coin))
+            {
+                lastGetDate.Remove(coin);
+            }
+            lastGetDate.Add(coin, DateTime.Now);
             return usdtDict[coin];
         }
 
@@ -129,7 +134,7 @@ namespace AutoSingle
                 return;
             }
 
-            int sleepSecond = (30 * 1000) % accountList.Count;
+            int sleepSecond = (30 * 1000) / accountList.Count;
             foreach (var account in accountList)
             {
                 Thread.Sleep(sleepSecond);
