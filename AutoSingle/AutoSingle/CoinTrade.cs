@@ -237,13 +237,7 @@ namespace AutoSingle
                             SellOrderResult = ""
                         });
                         // 下单成功马上去查一次
-                        string orderQuery = "";
-                        var queryOrder = new AccountOrder().QueryOrder(order.data, out orderQuery);
-                        if (queryOrder.status == "ok" && queryOrder.data.state == "filled")
-                        {
-                            // 完成
-                            new CoinDao().UpdateTradeRecordBuySuccess(order.data, queryOrder.data.price, orderQuery);
-                        }
+                        QueryDetailAndUpdate(order.data);
                     }
                     else
                     {
@@ -300,13 +294,7 @@ namespace AutoSingle
                                 SellOrderResult = ""
                             });
                             // 下单成功马上去查一次
-                            string orderQuery = "";
-                            var queryOrder = new AccountOrder().QueryOrder(order.data, out orderQuery);
-                            if (queryOrder.status == "ok" && queryOrder.data.state == "filled")
-                            {
-                                // 完成
-                                new CoinDao().UpdateTradeRecordBuySuccess(order.data, queryOrder.data.price, orderQuery);
-                            }
+                            QueryDetailAndUpdate(order.data);
                         }
                         else
                         {
@@ -314,6 +302,21 @@ namespace AutoSingle
                             logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
                         }
                     }
+                }
+            }
+        }
+
+        private static void QueryDetailAndUpdate(string orderId)
+        {
+            string orderQuery = "";
+            var queryOrder = new AccountOrder().QueryOrder(orderId, out orderQuery);
+            if (queryOrder.status == "ok" && queryOrder.data.state == "filled")
+            {
+                string orderDetail = "";
+                var detail = new AccountOrder().QueryDetail(orderId, out orderDetail);
+                if(detail.status == "ok")
+                {
+                    new CoinDao().UpdateTradeRecordBuySuccess(orderId, detail.data.price, orderQuery);
                 }
             }
         }

@@ -67,6 +67,22 @@ namespace AutoSingle
         public string source { get; set; }
     }
 
+    public class ResponseOrderDetail
+    {
+        public string status { get; set; }
+        public OrderDetailData data { get; set; }
+    }
+
+    public class OrderDetailData
+    {
+        public string id { get; set; }
+        // 如 gntusdt
+        public string symbol { get; set; }
+        public string type { get; set; }
+        public decimal price { get; set; }
+        public string source { get; set; }
+    }
+
     public class AccountBalance
     {
         public string status { get; set; }

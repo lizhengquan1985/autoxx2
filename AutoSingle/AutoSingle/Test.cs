@@ -85,6 +85,10 @@ namespace AutoSingle
                 string orderQuery = "";
                 var b = new AccountOrder().QueryOrder(orderId, out orderQuery);
                 Console.WriteLine(JsonConvert.SerializeObject(b));
+
+                string orderDetail = "";
+                var detail = new AccountOrder().QueryDetail(orderId, out orderDetail);
+                Console.WriteLine(detail);
             }
         }
     }
