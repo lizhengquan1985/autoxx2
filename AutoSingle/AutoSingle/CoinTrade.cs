@@ -160,13 +160,8 @@ namespace AutoSingle
                     var noSetBuySuccess = new CoinDao().ListNotSetBuySuccess(accountId, coin);
                     foreach (var item in noSetBuySuccess)
                     {
-                        string orderQuery = "";
-                        var queryOrder = new AccountOrder().QueryOrder(item.BuyOrderId, out orderQuery);
-                        if (queryOrder.status == "ok" && queryOrder.data.state == "filled")
-                        {
-                            // 完成
-                            new CoinDao().UpdateTradeRecordBuySuccess(item.BuyOrderId, queryOrder.data.price, orderQuery);
-                        }
+
+                        QueryDetailAndUpdate(item.BuyOrderId);
                     }
                 }
                 catch (Exception ex)
