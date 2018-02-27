@@ -13,7 +13,6 @@ namespace AutoSingle
         public static string accessKey = "";
         public static string secretKey = "";
 
-        public static string mainAccountId = "";
 
         public static string sqlConfig = "server=localhost;port=3306;user id=root; password=lyx123456; database=studyplan; pooling=true; charset=utf8mb4";
 
@@ -21,6 +20,7 @@ namespace AutoSingle
         {
             userName = role;
 
+            // 初始化accessKey，secretKey
             
 
         }
