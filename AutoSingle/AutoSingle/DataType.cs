@@ -70,7 +70,7 @@ namespace AutoSingle
     public class ResponseOrderDetail
     {
         public string status { get; set; }
-        public OrderDetailData data { get; set; }
+        public List<OrderDetailData> data { get; set; }
     }
 
     public class OrderDetailData

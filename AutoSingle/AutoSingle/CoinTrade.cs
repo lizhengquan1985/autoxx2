@@ -309,9 +309,17 @@ namespace AutoSingle
             {
                 string orderDetail = "";
                 var detail = new AccountOrder().QueryDetail(orderId, out orderDetail);
+                decimal maxPrice = 0;
+                foreach(var item in detail.data)
+                {
+                    if(maxPrice < item.price)
+                    {
+                        maxPrice = item.price;
+                    }
+                }
                 if(detail.status == "ok")
                 {
-                    new CoinDao().UpdateTradeRecordBuySuccess(orderId, detail.data.price, orderQuery);
+                    new CoinDao().UpdateTradeRecordBuySuccess(orderId, maxPrice, orderQuery);
                 }
             }
         }
@@ -337,13 +345,7 @@ namespace AutoSingle
                     {
                         new CoinDao().ChangeDataWhenSell(item.Id, sellQuantity, sellOrderPrice, JsonConvert.SerializeObject(order), JsonConvert.SerializeObject(flexPointList), order.data);
                         // 下单成功马上去查一次
-                        string orderQuery = "";
-                        var queryOrder = new AccountOrder().QueryOrder(order.data, out orderQuery);
-                        if (queryOrder.status == "ok" && queryOrder.data.state == "filled")
-                        {
-                            // 完成
-                            new CoinDao().UpdateTradeRecordSellSuccess(order.data, queryOrder.data.price, orderQuery);
-                        }
+                        QuerySellDetailAndUpdate(order.data);
                     }
                     else
                     {
@@ -351,6 +353,27 @@ namespace AutoSingle
                         logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
                     }
                 }
+            }
+        }
+
+        private static void QuerySellDetailAndUpdate(string orderId)
+        {
+            string orderQuery = "";
+            var queryOrder = new AccountOrder().QueryOrder(orderId, out orderQuery);
+            if (queryOrder.status == "ok" && queryOrder.data.state == "filled")
+            {
+                string orderDetail = "";
+                var detail = new AccountOrder().QueryDetail(orderId, out orderDetail);
+                decimal minPrice = 99999999;
+                foreach (var item in detail.data)
+                {
+                    if (minPrice > item.price)
+                    {
+                        minPrice = item.price;
+                    }
+                }
+                // 完成
+                new CoinDao().UpdateTradeRecordSellSuccess(orderId, minPrice, orderQuery);
             }
         }
 
