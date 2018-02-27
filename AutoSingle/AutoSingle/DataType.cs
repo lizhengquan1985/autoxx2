@@ -37,6 +37,10 @@ namespace AutoSingle
         public string id { get; set; }
         public string type { get; set; }
         public string subtype { get; set; }
+        /// <summary>
+        /// working正常
+        /// </summary>
+        public string state { get; set; }
     }
 
     public class ResponseOrder

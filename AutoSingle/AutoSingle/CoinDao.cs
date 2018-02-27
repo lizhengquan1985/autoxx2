@@ -20,27 +20,39 @@ namespace AutoSingle
         }
         protected IDapperConnection Database { get; private set; }
 
-        public void InsertLog(BuyRecord buyRecord)
+        public void CreateTradeRecord(TradeRecord tradeRecord)
         {
-            if (buyRecord.BuyAnalyze.Length > 4000)
+            if (tradeRecord.BuyAnalyze.Length > 4500)
             {
-                buyRecord.BuyAnalyze = buyRecord.BuyAnalyze.Substring(0, 4000);
+                tradeRecord.BuyAnalyze = tradeRecord.BuyAnalyze.Substring(0, 4500);
             }
-            if (buyRecord.BuyOrderResult.Length > 500)
+            if (tradeRecord.BuyOrderResult.Length > 500)
             {
-                buyRecord.BuyOrderResult = buyRecord.BuyOrderResult.Substring(0, 500);
+                tradeRecord.BuyOrderResult = tradeRecord.BuyOrderResult.Substring(0, 500);
             }
 
             using (var tx = Database.BeginTransaction())
             {
-                Database.Insert(buyRecord);
+                Database.Insert(tradeRecord);
                 tx.Commit();
             }
         }
 
-        public List<TradeRecord> ListNoSellRecord(string buyCoin)
+        /// <summary>
+        /// 获取没有出售的数量
+        /// </summary>
+        /// <param name="accountId"></param>
+        /// <param name="coin"></param>
+        /// <returns></returns>
+        public int GetNoSellRecordCount(string accountId, string coin)
         {
-            var sql = $"select * from t_buy_record where BuyCoin = '{buyCoin}' and HasSell=0 and UserName='{AccountConfig.userName}'";
+            var sql = $"select count(1) from t_trade_record where AccountId='{accountId}' and Coin = '{coin}' and HasSell=0 and UserName='{AccountConfig.userName}'";
+            return Database.Query<int>(sql).FirstOrDefault();
+        }
+
+        public List<TradeRecord> ListNoSellRecord(string accountId, string coin)
+        {
+            var sql = $"select * from t_trade_record where AccountId='{accountId}' and Coin = '{coin}' and HasSell=0 and UserName='{AccountConfig.userName}'";
             return Database.Query<TradeRecord>(sql).ToList();
         }
 

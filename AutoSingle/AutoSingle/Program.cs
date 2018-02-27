@@ -18,7 +18,7 @@ namespace AutoSingle
             logger.Error("-------------------------- 软件开始启动 ---------------------------------");
 
             AccountConfig.init("lzq");
-            Console.WriteLine($"{AccountConfig.mainAccountId}， {AccountConfig.accessKey}， {AccountConfig.secretKey}， {AccountConfig.sqlConfig}");
+            Console.WriteLine($"{AccountConfig.accessKey}， {AccountConfig.secretKey}， {AccountConfig.sqlConfig}");
             logger.Error("-------------------------- 软件账户配置完成 ---------------------------------");
 
             Console.WriteLine("输入1：测试，2：正式运行");
