@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AutoSingle
@@ -29,8 +30,16 @@ namespace AutoSingle
             }
             else
             {
-                CoinTrade.BeginRun();
+                while (true)
+                {
+                    Thread.Sleep(1000 * 2);
+
+                    CoinTrade.BeginRun();
+                }
             }
+
+            Console.WriteLine("输入任意推出");
+            Console.ReadLine();
         }
     }
 }

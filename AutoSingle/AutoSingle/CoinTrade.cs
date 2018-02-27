@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AutoSingle
@@ -12,6 +13,7 @@ namespace AutoSingle
     {
         static ILog logger = LogManager.GetLogger("CoinTrade");
 
+        private static ResponseAccount accounts;
         private static Dictionary<string, AccountBalanceItem> usdtDict;
         private static Dictionary<string, DateTime> lastGetDate;
 
@@ -101,9 +103,12 @@ namespace AutoSingle
         public static void BusinessRun()
         {
             // 1. 获取所有账户
-            var res = new AccountOrder().Accounts();
+            if(accounts == null)
+            {
+                accounts = new AccountOrder().Accounts();
+            }
             // 2. 分析账户下type为margin下的账户， 找到余额大于6， 并且平均大于1的账户
-            var accountList = res.data.Where(it => it.state == "working" && it.type == "margin").Select(it => it).ToList();
+            var accountList = accounts.data.Where(it => it.state == "working" && it.type == "margin").Select(it => it).ToList();
             for (var i = accountList.Count - 1; i >= 0; i--)
             {
                 var account = accountList[i];
@@ -120,20 +125,19 @@ namespace AutoSingle
             if (accountList.Count == 0)
             {
                 // 没有可操作的
+                Console.WriteLine("没有可操作的账户");
                 return;
             }
 
+            int sleepSecond = (30 * 1000) % accountList.Count;
             foreach (var account in accountList)
             {
+                Thread.Sleep(sleepSecond);
                 var coin = account.subtype.Substring(0, account.subtype.Length - 4);// 减去usdt字符
-                if (coin != "xrp")
-                {
-                    return;
-                }
-                Console.WriteLine($"开始操作{coin}");
 
                 var accountId = account.id;
                 var usdtBalance = GetBlance(accountId, coin);
+                Console.WriteLine($"------------- 开始操作 {coin} {JsonConvert.SerializeObject(usdtBalance)} ----------------------");
 
                 // 3. 对当前币做分析。找到拐点，并做交易
                 decimal lastLow;
@@ -193,6 +197,8 @@ namespace AutoSingle
             var noSellCount = new CoinDao().GetNoSellRecordCount(account.id, coin);
             // 平均推荐购买金额
             var avgBuyAmount = GetAvgBuyAmount(usdtBalance.balance, noSellCount);
+            Console.WriteLine($"-------------> avgBuyAmount {avgBuyAmount}");
+            Console.WriteLine($"-------------> noSellCount {noSellCount}");
             if (!flexPointList[0].isHigh && avgBuyAmount > 1)
             {
                 // 最后一次是高位
