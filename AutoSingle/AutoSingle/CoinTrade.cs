@@ -108,7 +108,7 @@ namespace AutoSingle
         public static void BusinessRun()
         {
             // 1. 获取所有账户
-            if(accounts == null)
+            if (accounts == null)
             {
                 accounts = new AccountOrder().Accounts();
             }
@@ -158,7 +158,7 @@ namespace AutoSingle
                 {
                     // 查询出结果还没好的数据， 去搜索一下
                     var noSetBuySuccess = new CoinDao().ListNotSetBuySuccess(accountId, coin);
-                    foreach(var item in noSetBuySuccess)
+                    foreach (var item in noSetBuySuccess)
                     {
                         string orderQuery = "";
                         var queryOrder = new AccountOrder().QueryOrder(item.BuyOrderId, out orderQuery);
@@ -229,12 +229,17 @@ namespace AutoSingle
                             AccountId = accountId,
                             BuySuccess = false,
                             BuyTradePrice = 0,
-                            BuyOrderId = order.data
+                            BuyOrderId = order.data,
+                            BuyOrderQuery = "",
+                            SellAnalyze = "",
+                            SellOrderId = "",
+                            SellOrderQuery = "",
+                            SellOrderResult = ""
                         });
                         // 下单成功马上去查一次
                         string orderQuery = "";
                         var queryOrder = new AccountOrder().QueryOrder(order.data, out orderQuery);
-                        if(queryOrder.status == "ok" && queryOrder.data.state == "filled")
+                        if (queryOrder.status == "ok" && queryOrder.data.state == "filled")
                         {
                             // 完成
                             new CoinDao().UpdateTradeRecordBuySuccess(order.data, queryOrder.data.price, orderQuery);
@@ -287,7 +292,12 @@ namespace AutoSingle
                                 AccountId = accountId,
                                 BuySuccess = false,
                                 BuyTradePrice = 0,
-                                BuyOrderId = order.data
+                                BuyOrderId = order.data,
+                                BuyOrderQuery = "",
+                                SellAnalyze = "",
+                                SellOrderId = "",
+                                SellOrderQuery = "",
+                                SellOrderResult = ""
                             });
                             // 下单成功马上去查一次
                             string orderQuery = "";

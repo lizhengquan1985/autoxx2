@@ -133,6 +133,7 @@ namespace AutoSingle
                 {"account-id", accountId},
                 {"amount", amount},
                 {"price", price},
+                { "source","margin-api"},
                 {"symbol", $"{coin}{toCoin}"},
                 {"type", "buy-limit"}
             };
@@ -167,6 +168,7 @@ namespace AutoSingle
                 {"account-id", accountId},
                 {"amount", amount},
                 {"price", price},
+                { "source","margin-api"},
                 {"symbol", $"{coin}{toCoin}"},
                 {"type", "sell-limit"}
             };
