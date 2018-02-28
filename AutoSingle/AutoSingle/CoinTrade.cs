@@ -211,7 +211,7 @@ namespace AutoSingle
             var noSellCount = new CoinDao().GetNoSellRecordCount(account.id, coin);
             // 平均推荐购买金额
             var avgBuyAmount = GetAvgBuyAmount(usdtBalance.balance, noSellCount);
-            Console.WriteLine($"杠杆-------> {coin.PadLeft(8, ' ')} 推荐额度 {avgBuyAmount} 未售出数量 {noSellCount}");
+            Console.WriteLine($"杠杆------->{coin.PadLeft(7, ' ')}   推荐额度:{decimal.Round(avgBuyAmount,6).ToString().PadLeft(10)}     未售出数量 {noSellCount}");
             if (!flexPointList[0].isHigh && avgBuyAmount > 1)
             {
                 // 最后一次是高位
