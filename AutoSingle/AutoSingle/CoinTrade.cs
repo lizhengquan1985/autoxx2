@@ -160,7 +160,6 @@ namespace AutoSingle
                     var noSetBuySuccess = new CoinDao().ListNotSetBuySuccess(accountId, coin);
                     foreach (var item in noSetBuySuccess)
                     {
-
                         QueryDetailAndUpdate(item.BuyOrderId);
                     }
                 }
@@ -175,8 +174,8 @@ namespace AutoSingle
                     var noSetSellSuccess = new CoinDao().ListHasSellNotSetSellSuccess(accountId, coin);
                     foreach (var item in noSetSellSuccess)
                     {
-                        Console.WriteLine();
-                        QuerySellDetailAndUpdate(item.BuyOrderId);
+                        Console.WriteLine("----------> " + JsonConvert.SerializeObject(item));
+                        QuerySellDetailAndUpdate(item.SellOrderId);
                     }
                 }
                 catch (Exception ex)
