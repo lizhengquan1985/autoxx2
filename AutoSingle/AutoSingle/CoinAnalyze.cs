@@ -40,7 +40,7 @@ namespace AutoSingle
             try
             {
                 ResponseKline res = new AnaylyzeApi().kline(coin + toCoin, "1min", 1440);
-                Console.WriteLine($"总数：{res.data.Count}");
+                //Console.WriteLine($"总数：{res.data.Count}");
                 //Console.WriteLine(Utils.GetDateById(res.data[0].id));
                 //Console.WriteLine(Utils.GetDateById(res.data[res.data.Count - 1].id));
 

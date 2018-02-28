@@ -142,7 +142,7 @@ namespace AutoSingle
 
                 var accountId = account.id;
                 var usdtBalance = GetBlance(accountId, coin);
-                Console.WriteLine($"------------- 开始操作 {coin} {JsonConvert.SerializeObject(usdtBalance)} ----------------------");
+                //Console.WriteLine($"------------- 开始操作 {coin} {JsonConvert.SerializeObject(usdtBalance)} ----------------------");
 
                 // 3. 对当前币做分析。找到拐点，并做交易
                 decimal lastLow;
@@ -211,8 +211,7 @@ namespace AutoSingle
             var noSellCount = new CoinDao().GetNoSellRecordCount(account.id, coin);
             // 平均推荐购买金额
             var avgBuyAmount = GetAvgBuyAmount(usdtBalance.balance, noSellCount);
-            Console.WriteLine($"-------------> avgBuyAmount {avgBuyAmount}");
-            Console.WriteLine($"-------------> noSellCount {noSellCount}");
+            Console.WriteLine($"杠杆-------> {coin.PadLeft(8, ' ')} 推荐额度 {avgBuyAmount} 未售出数量 {noSellCount}");
             if (!flexPointList[0].isHigh && avgBuyAmount > 1)
             {
                 // 最后一次是高位
