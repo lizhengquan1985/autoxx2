@@ -86,11 +86,11 @@ namespace AutoSingle
 
         public static decimal GetAvgBuyAmount(decimal balance, int noSellCount)
         {
-            if (noSellCount > 6)
+            if (noSellCount > 5)
             {
-                return balance / 5;
+                return balance / 4;
             }
-            return balance / (10 - noSellCount);
+            return balance / (8 - noSellCount);
         }
 
         public static void BeginRun()
@@ -162,6 +162,21 @@ namespace AutoSingle
                     {
 
                         QueryDetailAndUpdate(item.BuyOrderId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex.Message, ex);
+                }
+
+                try
+                {
+                    // 查询出结果还没好的数据， 去搜索一下
+                    var noSetSellSuccess = new CoinDao().ListHasSellNotSetSellSuccess(accountId, coin);
+                    foreach (var item in noSetSellSuccess)
+                    {
+                        Console.WriteLine();
+                        QuerySellDetailAndUpdate(item.BuyOrderId);
                     }
                 }
                 catch (Exception ex)

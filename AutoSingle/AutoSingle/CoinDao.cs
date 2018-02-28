@@ -54,6 +54,12 @@ namespace AutoSingle
             return Database.Query<TradeRecord>(sql).ToList();
         }
 
+        public List<TradeRecord> ListHasSellNotSetSellSuccess(string accountId, string coin)
+        {
+            var sql = $"select * from t_trade_record where AccountId='{accountId}' and Coin = '{coin}' and SellSuccess=0 and HasSell=1 and UserName='{AccountConfig.userName}'";
+            return Database.Query<TradeRecord>(sql).ToList();
+        }
+
         /// <summary>
         /// 获取没有出售的数量
         /// </summary>
