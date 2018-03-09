@@ -120,7 +120,7 @@ namespace AutoSingle
                 var coin = account.subtype.Substring(0, account.subtype.Length - 4);// 减去usdt字符
                 var usdt = GetBlance(account.id, coin);
                 var noSellCount = new CoinDao().GetNoSellRecordCount(account.id, coin);
-                if (usdt.balance < 6 || GetAvgBuyAmount(usdt.balance, noSellCount) < 1)
+                if (usdt.balance < 3 || GetAvgBuyAmount(usdt.balance, noSellCount) < (decimal)0.5)
                 {
                     accountList.RemoveAt(i);
                     continue;
@@ -351,6 +351,10 @@ namespace AutoSingle
                 {
                     decimal sellQuantity = item.BuyTotalQuantity * (decimal)0.99;
                     sellQuantity = decimal.Round(sellQuantity, getSellPrecisionNumber(coin));
+                    if(coin == "btc" && sellQuantity >= item.BuyTotalQuantity)
+                    {
+                        sellQuantity = sellQuantity - (decimal)0.0001;
+                    }
                     // 出售
                     decimal sellOrderPrice = decimal.Round(itemNowOpen * (decimal)0.985, getPrecisionNumber(coin));
                     ResponseOrder order = new AccountOrder().NewOrderSell(accountId, sellQuantity, sellOrderPrice, null, coin, "usdt");

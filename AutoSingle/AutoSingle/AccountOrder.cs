@@ -26,7 +26,7 @@ namespace AutoSingle
             secretKey = AccountConfig.secretKey;
         }
 
-        private const string domain = "api.huobi.pro";// "be.huobi.com";
+        private const string domain = "api.huobipro.com";// "be.huobi.com";
         private string baseUrl = $"https://{domain}";
         private string symbol = "ethcny";
         private const string SignatureMethod = "HmacSHA256";
