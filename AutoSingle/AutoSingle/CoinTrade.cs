@@ -454,13 +454,10 @@ namespace AutoSingle
                         // 下单成功马上去查一次
                         QuerySellDetailAndUpdate(order.data);
                     }
-                    else
-                    {
-                        //logger.Error($"出售结果 coin{coin} accountId:{accountId}  出售数量{sellQuantity} itemNowOpen{itemNowOpen} higher{higher} {JsonConvert.SerializeObject(order)}");
-                        logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
-                        logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(item)}");
-                        logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(anaylyzeData)}");
-                    }
+                    //logger.Error($"出售结果 coin{coin} accountId:{accountId}  出售数量{sellQuantity} itemNowOpen{itemNowOpen} higher{higher} {JsonConvert.SerializeObject(order)}");
+                    logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
+                    logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(item)}");
+                    logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(anaylyzeData)}");
                 }
             }
         }
