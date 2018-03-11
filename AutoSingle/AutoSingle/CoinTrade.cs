@@ -287,8 +287,9 @@ namespace AutoSingle
             Console.WriteLine($"杠杆------->{coin.PadLeft(7, ' ')}   推荐额度:{decimal.Round(avgBuyAmount, 6).ToString().PadLeft(10)}     未售出数量 {noSellCount}");
             if (!flexPointList[0].isHigh && avgBuyAmount > 1)
             {
-                // 最后一次是高位
-                if (noSellCount <= 0 && CheckCanBuy(nowOpen, flexPointList[0].open))
+                AnaylyzeData anaylyzeData = new CoinAnalyze().GetAnaylyzeData(coin, "usdt");
+                // 最后一次是高位, 比最近高位至少小于5%
+                if (noSellCount <= 0 && CheckCanBuy(nowOpen, flexPointList[0].open) && anaylyzeData.NowPrice * (decimal)1.05 < anaylyzeData.FiveHighestPrice)
                 {
                     // 可以考虑
                     decimal buyQuantity = avgBuyAmount / nowOpen;
@@ -346,6 +347,43 @@ namespace AutoSingle
 
                     // 再少于5%， 
                     decimal pecent = noSellCount >= 15 ? (decimal)1.03 : (decimal)1.025;
+                    if (anaylyzeData.NowLeanPercent > (decimal)0.8)
+                    {
+                        pecent = (decimal)1.05;
+                    }
+                    else if (anaylyzeData.NowLeanPercent > (decimal)0.7)
+                    {
+                        pecent = (decimal)1.046;
+                    }
+                    else if (anaylyzeData.NowLeanPercent > (decimal)0.6)
+                    {
+                        pecent = (decimal)1.042;
+                    }
+                    else if (anaylyzeData.NowLeanPercent > (decimal)0.5)
+                    {
+                        pecent = (decimal)1.038;
+                    }
+                    else if (anaylyzeData.NowLeanPercent > (decimal)0.4)
+                    {
+                        pecent = (decimal)1.034;
+                    }
+                    else if (anaylyzeData.NowLeanPercent > (decimal)0.3)
+                    {
+                        pecent = (decimal)1.030;
+                    }
+                    else if (anaylyzeData.NowLeanPercent > (decimal)0.2)
+                    {
+                        pecent = (decimal)1.026;
+                    }
+                    else if (anaylyzeData.NowLeanPercent > (decimal)0.1)
+                    {
+                        pecent = (decimal)1.025;
+                    }
+                    else
+                    {
+                        pecent = (decimal)1.02;
+                    }
+
                     if (nowOpen * pecent < minBuyPrice)
                     {
                         decimal buyQuantity = avgBuyAmount / nowOpen;
@@ -441,7 +479,7 @@ namespace AutoSingle
                     }
                     // 出售
                     decimal sellOrderPrice = decimal.Round(anaylyzeData.NowPrice * (decimal)0.985, getPrecisionNumber(coin));
-                    if(sellOrderPrice < item.BuyOrderPrice * (decimal)1.015)
+                    if (sellOrderPrice < item.BuyOrderPrice * (decimal)1.015)
                     {
                         logger.Error("-----------------算法有误--------------");
                         Console.WriteLine("-----------------算法有误--------------");
