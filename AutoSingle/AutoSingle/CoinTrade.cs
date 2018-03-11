@@ -415,11 +415,10 @@ namespace AutoSingle
                             // 下单成功马上去查一次
                             QueryDetailAndUpdate(order.data);
                         }
-                        else
-                        {
-                            logger.Error($"下单结果 coin{coin} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowOpen} {JsonConvert.SerializeObject(order)}");
-                            logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
-                        }
+                        logger.Error($"下单结果 coin{coin} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowOpen} {JsonConvert.SerializeObject(order)}");
+                        logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
+                        logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(anaylyzeData)}");
+                        logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(minBuyPrice)}");
                     }
                 }
             }
