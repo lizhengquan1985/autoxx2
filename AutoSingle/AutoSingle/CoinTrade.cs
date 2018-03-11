@@ -63,6 +63,73 @@ namespace AutoSingle
             return nowOpen > nearLowOpen * (decimal)1.005 && nowOpen < nearLowOpen * (decimal)1.01;
         }
 
+        public static bool CheckCanSellByAnaylyzeData(AnaylyzeData anaylyzeData, TradeRecord tradeRecord)
+        {
+            decimal nearHigherOpen = new decimal(0);
+            foreach (var item in anaylyzeData.OneKlineData)
+            {
+                if (Utils.GetDateById(item.id) < tradeRecord.BuyDate)
+                {
+                    continue;
+                }
+
+                if (item.open > nearHigherOpen)
+                {
+                    nearHigherOpen = item.open;
+                }
+            }
+
+            decimal percent = (decimal)1.03;
+            if (anaylyzeData.NowLeanPercent < (decimal)0.1)
+            {
+                percent = (decimal)1.10;
+            }
+            else if (anaylyzeData.NowLeanPercent < (decimal)0.2)
+            {
+                percent = (decimal)1.09;
+            }
+            else if (anaylyzeData.NowLeanPercent < (decimal)0.3)
+            {
+                percent = (decimal)1.08;
+            }
+            else if (anaylyzeData.NowLeanPercent < (decimal)0.4)
+            {
+                percent = (decimal)1.07;
+            }
+            else if (anaylyzeData.NowLeanPercent < (decimal)0.5)
+            {
+                percent = (decimal)1.06;
+            }
+            else if (anaylyzeData.NowLeanPercent < (decimal)0.6)
+            {
+                percent = (decimal)1.05;
+            }
+            else if (anaylyzeData.NowLeanPercent < (decimal)0.7)
+            {
+                percent = (decimal)1.04;
+            }
+            else if (anaylyzeData.NowLeanPercent < (decimal)0.8)
+            {
+                percent = (decimal)1.03;
+            }
+            else if (anaylyzeData.NowLeanPercent < (decimal)0.9)
+            {
+                percent = (decimal)1.03;
+            }
+
+            if (anaylyzeData.NowPrice < tradeRecord.BuyOrderPrice * percent)
+            {
+                return false;
+            }
+
+            if (anaylyzeData.NowPrice * (decimal)1.005 < nearHigherOpen)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public static bool CheckCanSell(decimal buyPrice, decimal nearHigherOpen, decimal nowOpen)
         {
             //item.BuyPrice, higher, itemNowOpen
@@ -82,7 +149,6 @@ namespace AutoSingle
             return false;
             // buyPrice * (decimal)1.05 < nearHigherOpen && 
         }
-
 
         public static decimal GetAvgBuyAmount(decimal balance, int noSellCount)
         {
@@ -114,18 +180,18 @@ namespace AutoSingle
             }
             // 2. 分析账户下type为margin下的账户， 找到余额大于6， 并且平均大于1的账户
             var accountList = accounts.data.Where(it => it.state == "working" && it.type == "margin").Select(it => it).ToList();
-            for (var i = accountList.Count - 1; i >= 0; i--)
-            {
-                var account = accountList[i];
-                var coin = account.subtype.Substring(0, account.subtype.Length - 4);// 减去usdt字符
-                var usdt = GetBlance(account.id, coin);
-                var noSellCount = new CoinDao().GetNoSellRecordCount(account.id, coin);
-                if (usdt.balance < 3 || GetAvgBuyAmount(usdt.balance, noSellCount) < (decimal)0.5)
-                {
-                    accountList.RemoveAt(i);
-                    continue;
-                }
-            }
+            //for (var i = accountList.Count - 1; i >= 0; i--)
+            //{
+            //var account = accountList[i];
+            //var coin = account.subtype.Substring(0, account.subtype.Length - 4);// 减去usdt字符
+            //var usdt = GetBlance(account.id, coin);
+            //var noSellCount = new CoinDao().GetNoSellRecordCount(account.id, coin);
+            //if (usdt.balance < 3 || GetAvgBuyAmount(usdt.balance, noSellCount) < (decimal)0.5)
+            //{
+            //    accountList.RemoveAt(i);
+            //    continue;
+            //}
+            //}
 
             if (accountList.Count == 0)
             {
@@ -138,9 +204,8 @@ namespace AutoSingle
             foreach (var account in accountList)
             {
                 Thread.Sleep(sleepSecond);
-                var coin = account.subtype.Substring(0, account.subtype.Length - 4);// 减去usdt字符
-
                 var accountId = account.id;
+                var coin = account.subtype.Substring(0, account.subtype.Length - 4);// 减去usdt字符
                 var usdtBalance = GetBlance(accountId, coin);
                 //Console.WriteLine($"------------- 开始操作 {coin} {JsonConvert.SerializeObject(usdtBalance)} ----------------------");
 
@@ -154,9 +219,11 @@ namespace AutoSingle
                     return;
                 }
 
+                #region 修正数据， 如果数据没修正，则要手工修正
+
                 try
                 {
-                    // 查询出结果还没好的数据， 去搜索一下
+                    // 查询购买结果还没ok的数据， 去搜索一下，如果ok了，则更新下结果
                     var noSetBuySuccess = new CoinDao().ListNotSetBuySuccess(accountId, coin);
                     foreach (var item in noSetBuySuccess)
                     {
@@ -170,7 +237,7 @@ namespace AutoSingle
 
                 try
                 {
-                    // 查询出结果还没好的数据， 去搜索一下
+                    // 查询出售结果还没好的数据， 去搜索一下，如果ok了，则更新下结果
                     var noSetSellSuccess = new CoinDao().ListHasSellNotSetSellSuccess(accountId, coin);
                     foreach (var item in noSetSellSuccess)
                     {
@@ -183,9 +250,15 @@ namespace AutoSingle
                     logger.Error(ex.Message, ex);
                 }
 
+                #endregion
+
                 try
                 {
-                    BusinessRunAccountForBuy(accountId, coin, account, lastLow, nowOpen, flexPointList);
+                    var noSellCount = new CoinDao().GetNoSellRecordCount(account.id, coin);
+                    if (usdtBalance.balance > 1 && GetAvgBuyAmount(usdtBalance.balance, noSellCount) > (decimal)0.5)
+                    {
+                        BusinessRunAccountForBuy(accountId, coin, account, lastLow, nowOpen, flexPointList);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -211,7 +284,7 @@ namespace AutoSingle
             var noSellCount = new CoinDao().GetNoSellRecordCount(account.id, coin);
             // 平均推荐购买金额
             var avgBuyAmount = GetAvgBuyAmount(usdtBalance.balance, noSellCount);
-            Console.WriteLine($"杠杆------->{coin.PadLeft(7, ' ')}   推荐额度:{decimal.Round(avgBuyAmount,6).ToString().PadLeft(10)}     未售出数量 {noSellCount}");
+            Console.WriteLine($"杠杆------->{coin.PadLeft(7, ' ')}   推荐额度:{decimal.Round(avgBuyAmount, 6).ToString().PadLeft(10)}     未售出数量 {noSellCount}");
             if (!flexPointList[0].isHigh && avgBuyAmount > 1)
             {
                 // 最后一次是高位
@@ -323,20 +396,29 @@ namespace AutoSingle
                 string orderDetail = "";
                 var detail = new AccountOrder().QueryDetail(orderId, out orderDetail);
                 decimal maxPrice = 0;
-                foreach(var item in detail.data)
+                foreach (var item in detail.data)
                 {
-                    if(maxPrice < item.price)
+                    if (maxPrice < item.price)
                     {
                         maxPrice = item.price;
                     }
                 }
-                if(detail.status == "ok")
+                if (detail.status == "ok")
                 {
                     new CoinDao().UpdateTradeRecordBuySuccess(orderId, maxPrice, orderQuery);
                 }
             }
         }
 
+        /// <summary>
+        /// 1. 计算每个购入价位，再最近一段时间的徘徊值，如果偏低，则出售百分比偏高
+        /// 2. 计算是当前bi种是否再所有里面是最低的，最更偏高。
+        /// 3. 耐性和毅力是最好结果的来源
+        /// </summary>
+        /// <param name="accountId"></param>
+        /// <param name="coin"></param>
+        /// <param name="account"></param>
+        /// <param name="flexPointList"></param>
         public static void BusinessRunAccountForSell(string accountId, string coin, AccountData account, List<FlexPoint> flexPointList)
         {
             var needSellList = new CoinDao().ListBuySuccessAndNoSellRecord(accountId, coin);
@@ -344,19 +426,27 @@ namespace AutoSingle
             foreach (var item in needSellList)
             {
                 // 分析是否 大于
-                decimal itemNowOpen = 0;
-                decimal higher = new CoinAnalyze().AnalyzeNeedSell(item.BuyOrderPrice, item.BuyDate, coin, "usdt", out itemNowOpen);
+                //decimal itemNowOpen = 0;
+                //decimal higher = new CoinAnalyze().AnalyzeNeedSell(item.BuyOrderPrice, item.BuyDate, coin, "usdt", out itemNowOpen);
+                AnaylyzeData anaylyzeData = new CoinAnalyze().GetAnaylyzeData(coin, "usdt");
 
-                if (CheckCanSell(item.BuyOrderPrice, higher, itemNowOpen))
+                //if (CheckCanSell(item.BuyOrderPrice, higher, itemNowOpen))
+                if (CheckCanSellByAnaylyzeData(anaylyzeData, item))
                 {
                     decimal sellQuantity = item.BuyTotalQuantity * (decimal)0.99;
                     sellQuantity = decimal.Round(sellQuantity, getSellPrecisionNumber(coin));
-                    if(coin == "btc" && sellQuantity >= item.BuyTotalQuantity)
+                    if (coin == "btc" && sellQuantity >= item.BuyTotalQuantity)
                     {
                         sellQuantity = sellQuantity - (decimal)0.0001;
                     }
                     // 出售
-                    decimal sellOrderPrice = decimal.Round(itemNowOpen * (decimal)0.985, getPrecisionNumber(coin));
+                    decimal sellOrderPrice = decimal.Round(anaylyzeData.NowPrice * (decimal)0.985, getPrecisionNumber(coin));
+                    if(sellOrderPrice < item.BuyOrderPrice * (decimal)1.015)
+                    {
+                        logger.Error("-----------------算法有误--------------");
+                        Console.WriteLine("-----------------算法有误--------------");
+                        return;
+                    }
                     ResponseOrder order = new AccountOrder().NewOrderSell(accountId, sellQuantity, sellOrderPrice, null, coin, "usdt");
                     if (order.status != "error")
                     {

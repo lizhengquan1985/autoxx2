@@ -120,6 +120,48 @@ namespace AutoSingle
             return new List<FlexPoint>();
         }
 
+        /// <summary>
+        /// 1. 计算5分钟的数据， 看看最高值和最低值，以及目前值
+        /// 2. 
+        /// </summary>
+        /// <param name="comparePrice"></param>
+        /// <param name="compareDate"></param>
+        /// <param name="coin"></param>
+        /// <param name="toCoin"></param>
+        /// <param name="nowOpen"></param>
+        /// <returns></returns>
+        public AnaylyzeData GetAnaylyzeData(string coin, string toCoin)
+        {
+            // 返回一个对象， 目前值， 5分钟最高值， 5分钟最低值，目前值得5分钟偏向（以最低值为准）,5分钟列表，1分钟列表
+            AnaylyzeData data = new AnaylyzeData();
+            ResponseKline fiveRes = new AnaylyzeApi().kline(coin + toCoin, "5min", 1440);
+            ResponseKline oneRes = new AnaylyzeApi().kline(coin + toCoin, "1min", 1440);
+            data.FiveKlineData = fiveRes.data;
+            data.OneKlineData = oneRes.data;
+            data.NowPrice = oneRes.data[0].open;
+
+            decimal highest = new decimal(0);
+            decimal lowest = new decimal(99999999);
+            foreach (var item in data.FiveKlineData)
+            {
+                if (item.open > highest)
+                {
+                    highest = item.open;
+                }
+                if(item.open < lowest)
+                {
+                    lowest = item.open;
+                }
+            }
+
+            data.FiveHighestPrice = highest;
+            data.FiveLowestPrice = lowest;
+            data.NowLeanPercent = (data.NowPrice - lowest) / (highest - lowest);
+            return data;
+        }
+
+
+
         public decimal AnalyzeNeedSell(decimal comparePrice, DateTime compareDate, string coin, string toCoin, out decimal nowOpen)
         {
             // 当前open

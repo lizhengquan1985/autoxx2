@@ -15,11 +15,11 @@ namespace AutoSingle
         static void Main(string[] args)
         {
             XmlConfigurator.Configure(new FileInfo("log4net.config"));
-            ILog logger = LogManager.GetLogger("program");
-            logger.Error("-------------------------- 软件开始启动 ---------------------------------");
+            ILog logger = LogManager.GetLogger(typeof(Program));
+            logger.Error("-------------------------- begin ---------------------------------");
 
             AccountConfig.init("lzq");
-            Console.WriteLine($"{AccountConfig.accessKey}， {AccountConfig.secretKey}， {AccountConfig.sqlConfig}");
+            Console.WriteLine($"mysql:{AccountConfig.sqlConfig}");
             logger.Error("-------------------------- 软件账户配置完成 ---------------------------------");
 
             Console.WriteLine("输入1：测试，2：正式运行");
@@ -33,6 +33,7 @@ namespace AutoSingle
                 while (true)
                 {
                     Thread.Sleep(1000 * 2);
+                    // 初始化所有分析数据
 
                     CoinTrade.BeginRun();
                 }
