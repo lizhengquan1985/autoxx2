@@ -65,7 +65,6 @@
   <ItemGroup>
     <Compile Include="AccountConfig.cs" />
     <Compile Include="AccountOrder.cs" />
-    <Compile Include="AnaylyzeApi.cs" />
     <Compile Include="CoinAnalyze.cs" />
     <Compile Include="CoinDao.cs" />
     <Compile Include="CoinTrade.cs" />
@@ -96,6 +95,15 @@
     <Content Include="docs\MySqlParameter.xml" />
     <Content Include="docs\MySqlParameterCollection.xml" />
     <Content Include="docs\MySqlTransaction.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Anaylyze\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AutoHuobi\AutoHuobi.csproj">
+      <Project>{f04ed43f-4431-4f98-987a-890cbef7d5cf}</Project>
+      <Name>AutoHuobi</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

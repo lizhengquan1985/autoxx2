@@ -1,4 +1,5 @@
-﻿using log4net;
+﻿using AutoHuobi;
+using log4net;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
