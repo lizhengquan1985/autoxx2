@@ -83,31 +83,31 @@ namespace AutoSingle
             decimal percent = (decimal)1.03;
             if (anaylyzeData.NowLeanPercent < (decimal)0.1)
             {
-                percent = (decimal)1.10;
+                percent = (decimal)1.07;
             }
             else if (anaylyzeData.NowLeanPercent < (decimal)0.2)
             {
-                percent = (decimal)1.09;
+                percent = (decimal)1.06;
             }
             else if (anaylyzeData.NowLeanPercent < (decimal)0.3)
             {
-                percent = (decimal)1.08;
+                percent = (decimal)1.055;
             }
             else if (anaylyzeData.NowLeanPercent < (decimal)0.4)
             {
-                percent = (decimal)1.07;
+                percent = (decimal)1.05;
             }
             else if (anaylyzeData.NowLeanPercent < (decimal)0.5)
             {
-                percent = (decimal)1.06;
+                percent = (decimal)1.045;
             }
             else if (anaylyzeData.NowLeanPercent < (decimal)0.6)
             {
-                percent = (decimal)1.05;
+                percent = (decimal)1.04;
             }
             else if (anaylyzeData.NowLeanPercent < (decimal)0.7)
             {
-                percent = (decimal)1.04;
+                percent = (decimal)1.035;
             }
             else if (anaylyzeData.NowLeanPercent < (decimal)0.8)
             {
@@ -418,8 +418,11 @@ namespace AutoSingle
                         }
                         logger.Error($"下单结果 coin{coin} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowOpen} {JsonConvert.SerializeObject(order)}");
                         logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
-                        logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(anaylyzeData)}");
+                        logger.Error($"下单结果 分析 {anaylyzeData.FiveHighestPrice} {anaylyzeData.FiveLowestPrice} {anaylyzeData.NowLeanPercent} {anaylyzeData.NowPrice}");
                         logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(minBuyPrice)}");
+                        logger.Error($"");
+                        logger.Error($"");
+                        logger.Error($"");
                     }
                 }
             }
@@ -495,7 +498,10 @@ namespace AutoSingle
                     //logger.Error($"出售结果 coin{coin} accountId:{accountId}  出售数量{sellQuantity} itemNowOpen{itemNowOpen} higher{higher} {JsonConvert.SerializeObject(order)}");
                     logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
                     logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(item)}");
-                    logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(anaylyzeData)}");
+                    logger.Error($"下单结果 分析 {anaylyzeData.FiveHighestPrice} {anaylyzeData.FiveLowestPrice} {anaylyzeData.NowLeanPercent} {anaylyzeData.NowPrice}");
+                    logger.Error($"");
+                    logger.Error($"");
+                    logger.Error($"");
                 }
             }
         }

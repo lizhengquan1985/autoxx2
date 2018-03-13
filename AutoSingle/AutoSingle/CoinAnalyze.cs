@@ -67,7 +67,7 @@ namespace AutoSingle
                         idLow = item.id;
                     }
 
-                    if (openHigh >= openLow * (decimal)1.025)
+                    if (openHigh >= openLow * (decimal)1.03)
                     {
                         var dtHigh = Utils.GetDateById(idHigh);
                         var dtLow = Utils.GetDateById(idLow);
