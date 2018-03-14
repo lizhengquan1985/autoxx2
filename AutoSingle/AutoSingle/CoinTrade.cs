@@ -254,14 +254,16 @@ namespace AutoSingle
                         // 下单成功马上去查一次
                         QueryDetailAndUpdate(order.data);
                     }
-                    logger.Error($"下单结果 {coin} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowOpen} {JsonConvert.SerializeObject(order)}");
-                    logger.Error($"下单结果 拐点分析 {JsonConvert.SerializeObject(flexPointList)}");
+                    logger.Error($"下单数据 coin：{coin} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowOpen}，orderPrice：{orderPrice}");
+                    logger.Error($"下单拐点 {JsonConvert.SerializeObject(flexPointList)}");
+                    logger.Error($"下单结果 {JsonConvert.SerializeObject(order)}");
                 }
 
                 if (noSellCount > 0)
                 {
                     // 获取最小的那个， 如果有，
                     decimal minBuyPrice = 9999;
+                    DateTime nearBuyDate = DateTime.MinValue;
                     var noSellList = new CoinDao().ListNoSellRecord(accountId, coin);
                     if (noSellList.Count == 0)
                     {
@@ -273,48 +275,15 @@ namespace AutoSingle
                         {
                             minBuyPrice = item.BuyOrderPrice;
                         }
+                        if(item.BuyDate > nearBuyDate)
+                        {
+                            nearBuyDate = item.BuyDate;
+                        }
                     }
 
-                    // 再少于5%， 
-                    decimal pecent = noSellCount >= 15 ? (decimal)1.03 : (decimal)1.025;
-                    if (anaylyzeData.NowLeanPercent > (decimal)0.8)
-                    {
-                        pecent = (decimal)1.05;
-                    }
-                    else if (anaylyzeData.NowLeanPercent > (decimal)0.7)
-                    {
-                        pecent = (decimal)1.046;
-                    }
-                    else if (anaylyzeData.NowLeanPercent > (decimal)0.6)
-                    {
-                        pecent = (decimal)1.042;
-                    }
-                    else if (anaylyzeData.NowLeanPercent > (decimal)0.5)
-                    {
-                        pecent = (decimal)1.038;
-                    }
-                    else if (anaylyzeData.NowLeanPercent > (decimal)0.4)
-                    {
-                        pecent = (decimal)1.034;
-                    }
-                    else if (anaylyzeData.NowLeanPercent > (decimal)0.3)
-                    {
-                        pecent = (decimal)1.030;
-                    }
-                    else if (anaylyzeData.NowLeanPercent > (decimal)0.2)
-                    {
-                        pecent = (decimal)1.026;
-                    }
-                    else if (anaylyzeData.NowLeanPercent > (decimal)0.1)
-                    {
-                        pecent = (decimal)1.025;
-                    }
-                    else
-                    {
-                        pecent = (decimal)1.02;
-                    }
-
-                    if (nowOpen * pecent < minBuyPrice)
+                    // 再少于1%， 并且最近购买时间要至少相差30分钟   控制下单的次数
+                    decimal pecent = noSellCount >= 15 ? (decimal)1.05 : (decimal)1.05;
+                    if (nearBuyDate < DateTime.Now.AddMinutes(-60 * 4) || nowOpen * pecent < minBuyPrice)
                     {
                         decimal buyQuantity = avgBuyAmount / nowOpen;
                         buyQuantity = decimal.Round(buyQuantity, GetBuyQuantityPrecisionNumber(coin));
@@ -345,10 +314,9 @@ namespace AutoSingle
                             // 下单成功马上去查一次
                             QueryDetailAndUpdate(order.data);
                         }
-                        logger.Error($"下单结果 coin{coin} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowOpen} {JsonConvert.SerializeObject(order)}");
-                        logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
-                        logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(anaylyzeData)}");
-                        logger.Error($"下单结果 分析 {JsonConvert.SerializeObject(minBuyPrice)}");
+                        logger.Error($"下单数据 coin：{coin} accountId：{accountId}  购买数量：{buyQuantity} buyPrice：{buyPrice} nowOpen：{nowOpen},minBuyPrice:{minBuyPrice}");
+                        logger.Error($"下单拐点{JsonConvert.SerializeObject(flexPointList)}");
+                        logger.Error($"下单结果{JsonConvert.SerializeObject(order)}");
                     }
                 }
             }
