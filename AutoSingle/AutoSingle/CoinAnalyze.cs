@@ -33,18 +33,13 @@ namespace AutoSingle
         /// </summary>
         /// <param name="coin"></param>
         /// <param name="toCoin"></param>
-        public List<FlexPoint> Analyze(string coin, string toCoin, out decimal lastLow, out decimal nowOpen)
+        public List<FlexPoint> Analyze(string coin, string toCoin, out decimal nowOpen)
         {
             nowOpen = 0;
-            lastLow = 999999999;
 
             try
             {
                 ResponseKline res = new AnaylyzeApi().kline(coin + toCoin, "1min", 1440);
-                //Console.WriteLine($"总数：{res.data.Count}");
-                //Console.WriteLine(Utils.GetDateById(res.data[0].id));
-                //Console.WriteLine(Utils.GetDateById(res.data[res.data.Count - 1].id));
-
                 nowOpen = res.data[0].open;
 
                 List<FlexPoint> flexPointList = new List<FlexPoint>();
@@ -67,11 +62,9 @@ namespace AutoSingle
                         idLow = item.id;
                     }
 
-                    if (openHigh >= openLow * (decimal)1.03)
+                    // 相差了6%， 说明是一个节点了。
+                    if (openHigh >= openLow * (decimal)1.06)
                     {
-                        var dtHigh = Utils.GetDateById(idHigh);
-                        var dtLow = Utils.GetDateById(idLow);
-                        // 相差了2%， 说明是一个节点了。
                         if (idHigh > idLow && lastHighOrLow != 1)
                         {
                             flexPointList.Add(new FlexPoint() { isHigh = true, open = openHigh, id = idHigh });
@@ -86,30 +79,7 @@ namespace AutoSingle
                             openLow = openHigh;
                             idLow = idHigh;
                         }
-                        else if (lastHighOrLow == 1)
-                        {
-
-                        }
                     }
-                }
-
-                if (flexPointList[0].isHigh)
-                {
-                    // 
-                    foreach (var item in res.data)
-                    {
-                        if (item.id < flexPointList[0].id && lastLow > item.open)
-                        {
-                            lastLow = item.open;
-                        }
-                    }
-                }
-
-                if (flexPointList.Count < 0)
-                {
-                    logger.Error($"--------------{idHigh}------{idLow}------------------");
-                    logger.Error(JsonConvert.SerializeObject(flexPointList));
-                    logger.Error(JsonConvert.SerializeObject(res.data));
                 }
 
                 return flexPointList;
@@ -117,8 +87,8 @@ namespace AutoSingle
             catch (Exception ex)
             {
                 logger.Error(ex.Message, ex);
+                return new List<FlexPoint>();
             }
-            return new List<FlexPoint>();
         }
 
         /// <summary>
@@ -149,7 +119,7 @@ namespace AutoSingle
                 {
                     highest = item.open;
                 }
-                if(item.open < lowest)
+                if (item.open < lowest)
                 {
                     lowest = item.open;
                 }
