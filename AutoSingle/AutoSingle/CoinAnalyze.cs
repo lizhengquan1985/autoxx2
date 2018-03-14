@@ -33,10 +33,9 @@ namespace AutoSingle
         /// </summary>
         /// <param name="coin"></param>
         /// <param name="toCoin"></param>
-        public List<FlexPoint> Analyze(string coin, string toCoin, out decimal lastLow, out decimal nowOpen)
+        public List<FlexPoint> Analyze(string coin, string toCoin, out decimal nowOpen)
         {
             nowOpen = 0;
-            lastLow = 999999999;
 
             try
             {
@@ -83,31 +82,13 @@ namespace AutoSingle
                     }
                 }
 
-                if (flexPointList[0].isHigh)
-                {
-                    foreach (var item in res.data)
-                    {
-                        if (item.id < flexPointList[0].id && lastLow > item.open)
-                        {
-                            lastLow = item.open;
-                        }
-                    }
-                }
-
-                if (flexPointList.Count < 0)
-                {
-                    logger.Error($"--------------{idHigh}------{idLow}------------------");
-                    logger.Error(JsonConvert.SerializeObject(flexPointList));
-                    logger.Error(JsonConvert.SerializeObject(res.data));
-                }
-
                 return flexPointList;
             }
             catch (Exception ex)
             {
                 logger.Error(ex.Message, ex);
+                return new List<FlexPoint>();
             }
-            return new List<FlexPoint>();
         }
 
         /// <summary>
@@ -138,7 +119,7 @@ namespace AutoSingle
                 {
                     highest = item.open;
                 }
-                if(item.open < lowest)
+                if (item.open < lowest)
                 {
                     lowest = item.open;
                 }

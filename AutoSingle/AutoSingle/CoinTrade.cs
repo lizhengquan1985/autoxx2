@@ -60,7 +60,7 @@ namespace AutoSingle
 
         public static bool CheckCanBuy(decimal nowOpen, decimal nearLowOpen)
         {
-            return nowOpen > nearLowOpen * (decimal)1.005 && nowOpen < nearLowOpen * (decimal)1.01;
+            return nowOpen > nearLowOpen * (decimal)1.005 && nowOpen < nearLowOpen * (decimal)1.012;
         }
 
         public static bool CheckCanSellByAnaylyzeData(AnaylyzeData anaylyzeData, TradeRecord tradeRecord)
@@ -143,9 +143,8 @@ namespace AutoSingle
                 var usdtBalance = GetBlance(accountId, coin);
 
                 // 3. 对当前币做分析。找到拐点，并做交易
-                decimal lastLow;
                 decimal nowOpen;
-                var flexPointList = new CoinAnalyze().Analyze(coin, "usdt", out lastLow, out nowOpen);
+                var flexPointList = new CoinAnalyze().Analyze(coin, "usdt",out nowOpen);
                 if (flexPointList.Count == 0)
                 {
                     logger.Error($"--------------> 分析结果数量为0 {coin}");
@@ -188,9 +187,9 @@ namespace AutoSingle
                 try
                 {
                     var noSellCount = new CoinDao().GetNoSellRecordCount(account.id, coin);
-                    if (usdtBalance.balance > 1 && GetAvgBuyAmount(usdtBalance.balance, noSellCount) > (decimal)0.5)
+                    if (usdtBalance.balance > 1 && GetAvgBuyAmount(usdtBalance.balance, noSellCount) > (decimal)0.6)
                     {
-                        BusinessRunAccountForBuy(accountId, coin, account, lastLow, nowOpen, flexPointList);
+                        BusinessRunAccountForBuy(accountId, coin, account, nowOpen, flexPointList);
                     }
                 }
                 catch (Exception ex)
@@ -209,19 +208,20 @@ namespace AutoSingle
             }
         }
 
-        public static void BusinessRunAccountForBuy(string accountId, string coin, AccountData account, decimal lastLow, decimal nowOpen, List<FlexPoint> flexPointList)
+        public static void BusinessRunAccountForBuy(string accountId, string coin, AccountData account, decimal nowOpen, List<FlexPoint> flexPointList)
         {
             var usdtBalance = GetBlance(accountId, coin);
 
-            // 4. 对购入的成交价 和 出售的成交价做记录
             var noSellCount = new CoinDao().GetNoSellRecordCount(account.id, coin);
             // 平均推荐购买金额
             var avgBuyAmount = GetAvgBuyAmount(usdtBalance.balance, noSellCount);
             Console.WriteLine($"杠杆------->{coin.PadLeft(7, ' ')}   推荐额度:{decimal.Round(avgBuyAmount, 6).ToString().PadLeft(10)}     未售出数量 {noSellCount}");
-            if (!flexPointList[0].isHigh && avgBuyAmount > 1)
+            if (!flexPointList[0].isHigh && avgBuyAmount >= 1)
             {
                 AnaylyzeData anaylyzeData = new CoinAnalyze().GetAnaylyzeData(coin, "usdt");
-                // 最后一次是高位, 比最近高位至少小于5%
+                // 最后一次是高位, 
+                // 一定要小于5天内最高位的5%
+                // 不追高????
                 if (noSellCount <= 0 && CheckCanBuy(nowOpen, flexPointList[0].open) && anaylyzeData.NowPrice * (decimal)1.05 < anaylyzeData.FiveHighestPrice)
                 {
                     // 可以考虑
@@ -254,11 +254,8 @@ namespace AutoSingle
                         // 下单成功马上去查一次
                         QueryDetailAndUpdate(order.data);
                     }
-                    else
-                    {
-                        logger.Error($"下单结果 {coin} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowOpen} {JsonConvert.SerializeObject(order)}");
-                        logger.Error($"下单结果 拐点分析 {JsonConvert.SerializeObject(flexPointList)}");
-                    }
+                    logger.Error($"下单结果 {coin} accountId:{accountId}  购买数量{buyQuantity} nowOpen{nowOpen} {JsonConvert.SerializeObject(order)}");
+                    logger.Error($"下单结果 拐点分析 {JsonConvert.SerializeObject(flexPointList)}");
                 }
 
                 if (noSellCount > 0)
