@@ -124,7 +124,7 @@ namespace AutoSingle
                 accounts = new AccountOrder().Accounts();
             }
             var accountList = accounts.data.Where(it => it.state == "working" && it.type == "margin").Select(it => it).ToList();
-
+            
             if (accountList.Count == 0)
             {
                 // 没有可操作的
@@ -148,7 +148,7 @@ namespace AutoSingle
                 if (flexPointList.Count == 0)
                 {
                     logger.Error($"--------------> 分析结果数量为0 {coin}");
-                    return;
+                    continue;
                 }
 
                 #region 修正数据， 如果数据没修正，则要手工修正
