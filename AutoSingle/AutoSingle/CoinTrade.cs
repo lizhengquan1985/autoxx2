@@ -68,7 +68,7 @@ namespace AutoSingle
             decimal nearHigherOpen = new decimal(0);
             foreach (var item in anaylyzeData.OneKlineData)
             {
-                if (Utils.GetDateById(item.id) < tradeRecord.BuyDate)
+                if (Utils.GetDateById(item.id) <= tradeRecord.BuyDate)
                 {
                     continue;
                 }
@@ -79,14 +79,14 @@ namespace AutoSingle
                 }
             }
 
-            decimal percent = (decimal)1.05;
+            decimal percent = (decimal)1.04;
 
             if (anaylyzeData.NowPrice < tradeRecord.BuyOrderPrice * percent)
             {
                 return false;
             }
 
-            if (anaylyzeData.NowPrice * (decimal)1.005 < nearHigherOpen)
+            if (anaylyzeData.NowPrice * (decimal)1.005 < nearHigherOpen && anaylyzeData.NowPrice * (decimal)1.015 > nearHigherOpen)
             {
                 return true;
             }
@@ -356,6 +356,11 @@ namespace AutoSingle
         /// <param name="flexPointList"></param>
         public static void BusinessRunAccountForSell(string accountId, string coin, AccountData account, List<FlexPoint> flexPointList)
         {
+            if(flexPointList.Count == 0 || !flexPointList[0].isHigh)
+            {
+                return;
+            }
+
             var needSellList = new CoinDao().ListBuySuccessAndNoSellRecord(accountId, coin);
             // 查询数据库中已经下单数据，如果有，则比较之后的最高值，如果有，则出售
             foreach (var item in needSellList)
@@ -376,7 +381,7 @@ namespace AutoSingle
                     }
                     // 出售
                     decimal sellOrderPrice = decimal.Round(anaylyzeData.NowPrice * (decimal)0.985, getPrecisionNumber(coin));
-                    if (sellOrderPrice < item.BuyOrderPrice * (decimal)1.015)
+                    if (sellOrderPrice < item.BuyOrderPrice * (decimal)1.025)
                     {
                         logger.Error("-----------------算法有误--------------");
                         Console.WriteLine("-----------------算法有误--------------");
@@ -389,10 +394,10 @@ namespace AutoSingle
                         // 下单成功马上去查一次
                         QuerySellDetailAndUpdate(order.data);
                     }
-                    //logger.Error($"出售结果 coin{coin} accountId:{accountId}  出售数量{sellQuantity} itemNowOpen{itemNowOpen} higher{higher} {JsonConvert.SerializeObject(order)}");
-                    logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(flexPointList)}");
-                    logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(item)}");
-                    logger.Error($"出售结果 分析 {JsonConvert.SerializeObject(anaylyzeData)}");
+                    logger.Error($"出售结果 coin{coin} accountId:{accountId}  出售数量{sellQuantity} sellOrderPrice：{sellOrderPrice}");
+                    logger.Error($"出售拐点 {JsonConvert.SerializeObject(flexPointList)}");
+                    logger.Error($"出售单子 {JsonConvert.SerializeObject(item)}");
+                    logger.Error($"出售结果 {JsonConvert.SerializeObject(order)}");
                 }
             }
         }
