@@ -17,11 +17,20 @@ namespace AutoSingle
 
         public static void init(string role)
         {
+            Console.WriteLine($"------> 角色:{role}");
             userName = role;
 
             // 初始化accessKey，secretKey
-            
-
+            if (role == "lzq")
+            {
+                accessKey = "";
+                secretKey = "";
+            }
+            else if (role == "yxq")
+            {
+                accessKey = "";
+                secretKey = "";
+            }
         }
     }
 }
