@@ -60,7 +60,6 @@ namespace AutoSingle
 
         public static bool CheckCanBuy(decimal nowOpen, decimal nearLowOpen)
         {
-            //nowOpen > flexPointList[0].open * (decimal)1.005 && nowOpen < flexPointList[0].open * (decimal)1.01
             return nowOpen > nearLowOpen * (decimal)1.005 && nowOpen < nearLowOpen * (decimal)1.01;
         }
 
@@ -80,43 +79,7 @@ namespace AutoSingle
                 }
             }
 
-            decimal percent = (decimal)1.03;
-            if (anaylyzeData.NowLeanPercent < (decimal)0.1)
-            {
-                percent = (decimal)1.10;
-            }
-            else if (anaylyzeData.NowLeanPercent < (decimal)0.2)
-            {
-                percent = (decimal)1.09;
-            }
-            else if (anaylyzeData.NowLeanPercent < (decimal)0.3)
-            {
-                percent = (decimal)1.08;
-            }
-            else if (anaylyzeData.NowLeanPercent < (decimal)0.4)
-            {
-                percent = (decimal)1.07;
-            }
-            else if (anaylyzeData.NowLeanPercent < (decimal)0.5)
-            {
-                percent = (decimal)1.06;
-            }
-            else if (anaylyzeData.NowLeanPercent < (decimal)0.6)
-            {
-                percent = (decimal)1.05;
-            }
-            else if (anaylyzeData.NowLeanPercent < (decimal)0.7)
-            {
-                percent = (decimal)1.04;
-            }
-            else if (anaylyzeData.NowLeanPercent < (decimal)0.8)
-            {
-                percent = (decimal)1.03;
-            }
-            else if (anaylyzeData.NowLeanPercent < (decimal)0.9)
-            {
-                percent = (decimal)1.03;
-            }
+            decimal percent = (decimal)1.05;
 
             if (anaylyzeData.NowPrice < tradeRecord.BuyOrderPrice * percent)
             {
@@ -129,26 +92,6 @@ namespace AutoSingle
             }
 
             return false;
-        }
-
-        public static bool CheckCanSell(decimal buyPrice, decimal nearHigherOpen, decimal nowOpen)
-        {
-            //item.BuyPrice, higher, itemNowOpen
-            // if (item.BuyPrice * (decimal)1.05 < higher && itemNowOpen * (decimal)1.005 < higher)
-            if (nowOpen < buyPrice * (decimal)1.03)
-            {
-                // 如果不高于 3% 没有意义
-                return false;
-            }
-
-            if (nowOpen * (decimal)1.005 < nearHigherOpen)
-            {
-                // 表示回头趋势， 暂时定为 0.5% 就有回头趋势
-                return true;
-            }
-
-            return false;
-            // buyPrice * (decimal)1.05 < nearHigherOpen && 
         }
 
         public static decimal GetAvgBuyAmount(decimal balance, int noSellCount)
@@ -174,25 +117,13 @@ namespace AutoSingle
 
         public static void BusinessRun()
         {
-            // 1. 获取所有账户
+            #region 获取所有账户 并找到账户下type为margin下的账户
+
             if (accounts == null)
             {
                 accounts = new AccountOrder().Accounts();
             }
-            // 2. 分析账户下type为margin下的账户， 找到余额大于6， 并且平均大于1的账户
             var accountList = accounts.data.Where(it => it.state == "working" && it.type == "margin").Select(it => it).ToList();
-            //for (var i = accountList.Count - 1; i >= 0; i--)
-            //{
-            //var account = accountList[i];
-            //var coin = account.subtype.Substring(0, account.subtype.Length - 4);// 减去usdt字符
-            //var usdt = GetBlance(account.id, coin);
-            //var noSellCount = new CoinDao().GetNoSellRecordCount(account.id, coin);
-            //if (usdt.balance < 3 || GetAvgBuyAmount(usdt.balance, noSellCount) < (decimal)0.5)
-            //{
-            //    accountList.RemoveAt(i);
-            //    continue;
-            //}
-            //}
 
             if (accountList.Count == 0)
             {
@@ -201,6 +132,8 @@ namespace AutoSingle
                 return;
             }
 
+            #endregion
+
             int sleepSecond = (30 * 1000) / accountList.Count;
             foreach (var account in accountList)
             {
@@ -208,7 +141,6 @@ namespace AutoSingle
                 var accountId = account.id;
                 var coin = account.subtype.Substring(0, account.subtype.Length - 4);// 减去usdt字符
                 var usdtBalance = GetBlance(accountId, coin);
-                //Console.WriteLine($"------------- 开始操作 {coin} {JsonConvert.SerializeObject(usdtBalance)} ----------------------");
 
                 // 3. 对当前币做分析。找到拐点，并做交易
                 decimal lastLow;
