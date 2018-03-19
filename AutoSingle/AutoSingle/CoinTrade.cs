@@ -79,7 +79,7 @@ namespace AutoSingle
                 }
             }
 
-            decimal percent = (decimal)1.04;
+            decimal percent = (decimal)1.10;
 
             if (anaylyzeData.NowPrice < tradeRecord.BuyOrderPrice * percent)
             {
@@ -98,9 +98,9 @@ namespace AutoSingle
         {
             if (noSellCount > 5)
             {
-                return balance / 4;
+                return balance / 8;
             }
-            return balance / (8 - noSellCount);
+            return balance / (15 - noSellCount);
         }
 
         public static void BeginRun()
@@ -189,7 +189,10 @@ namespace AutoSingle
                     var noSellCount = new CoinDao().GetNoSellRecordCount(account.id, coin);
                     if (usdtBalance.balance > 1 && GetAvgBuyAmount(usdtBalance.balance, noSellCount) > (decimal)0.6)
                     {
-                        BusinessRunAccountForBuy(accountId, coin, account, nowOpen, flexPointList);
+                        if(coin != "btc" || GetAvgBuyAmount(usdtBalance.balance, noSellCount) > (decimal)10)
+                        {
+                            BusinessRunAccountForBuy(accountId, coin, account, nowOpen, flexPointList);
+                        }
                     }
                 }
                 catch (Exception ex)
