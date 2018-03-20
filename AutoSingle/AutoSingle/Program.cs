@@ -32,7 +32,7 @@ namespace AutoSingle
             {
                 while (true)
                 {
-                    Thread.Sleep(1000 * 2);
+                    Thread.Sleep(1000 * 1);
                     // 初始化所有分析数据
 
                     CoinTrade.BeginRun();

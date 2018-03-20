@@ -79,7 +79,7 @@ namespace AutoSingle
                 }
             }
 
-            decimal percent = (decimal)1.10;
+            decimal percent = (decimal)1.08;
 
             if (anaylyzeData.NowPrice < tradeRecord.BuyOrderPrice * percent)
             {
@@ -96,11 +96,12 @@ namespace AutoSingle
 
         public static decimal GetAvgBuyAmount(decimal balance, int noSellCount)
         {
+            var a = balance / (15 - noSellCount);
             if (noSellCount > 5)
             {
-                return balance / 8;
+                a = balance / 8;
             }
-            return balance / (15 - noSellCount);
+            return Math.Min(a, 20);
         }
 
         public static void BeginRun()
@@ -124,7 +125,7 @@ namespace AutoSingle
                 accounts = new AccountOrder().Accounts();
             }
             var accountList = accounts.data.Where(it => it.state == "working" && it.type == "margin").Select(it => it).ToList();
-            
+
             if (accountList.Count == 0)
             {
                 // 没有可操作的
@@ -144,7 +145,7 @@ namespace AutoSingle
 
                 // 3. 对当前币做分析。找到拐点，并做交易
                 decimal nowOpen;
-                var flexPointList = new CoinAnalyze().Analyze(coin, "usdt",out nowOpen);
+                var flexPointList = new CoinAnalyze().Analyze(coin, "usdt", out nowOpen);
                 if (flexPointList.Count == 0)
                 {
                     logger.Error($"--------------> 分析结果数量为0 {coin}");
@@ -189,7 +190,7 @@ namespace AutoSingle
                     var noSellCount = new CoinDao().GetNoSellRecordCount(account.id, coin);
                     if (usdtBalance.balance > 1 && GetAvgBuyAmount(usdtBalance.balance, noSellCount) > (decimal)0.6)
                     {
-                        if(coin != "btc" || GetAvgBuyAmount(usdtBalance.balance, noSellCount) > (decimal)10)
+                        if (coin != "btc" || GetAvgBuyAmount(usdtBalance.balance, noSellCount) > (decimal)10)
                         {
                             BusinessRunAccountForBuy(accountId, coin, account, nowOpen, flexPointList);
                         }
@@ -278,7 +279,7 @@ namespace AutoSingle
                         {
                             minBuyPrice = item.BuyOrderPrice;
                         }
-                        if(item.BuyDate > nearBuyDate)
+                        if (item.BuyDate > nearBuyDate)
                         {
                             nearBuyDate = item.BuyDate;
                         }
@@ -359,7 +360,7 @@ namespace AutoSingle
         /// <param name="flexPointList"></param>
         public static void BusinessRunAccountForSell(string accountId, string coin, AccountData account, List<FlexPoint> flexPointList)
         {
-            if(flexPointList.Count == 0 || !flexPointList[0].isHigh)
+            if (flexPointList.Count == 0 || !flexPointList[0].isHigh)
             {
                 return;
             }
@@ -381,6 +382,10 @@ namespace AutoSingle
                     if (coin == "btc" && sellQuantity >= item.BuyTotalQuantity)
                     {
                         sellQuantity = sellQuantity - (decimal)0.0001;
+                    }
+                    if (sellQuantity < (decimal)0.0001)
+                    {
+                        sellQuantity = (decimal)0.0001;
                     }
                     // 出售
                     decimal sellOrderPrice = decimal.Round(anaylyzeData.NowPrice * (decimal)0.985, getPrecisionNumber(coin));
